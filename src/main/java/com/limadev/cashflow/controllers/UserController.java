@@ -1,21 +1,36 @@
 package com.limadev.cashflow.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.limadev.cashflow.repositories.UserRepository;
+import com.limadev.cashflow.services.TokenService;
+import com.limadev.cashflow.user.User;
+import com.limadev.cashflow.user.UserDTO;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
+@CrossOrigin
 @RequestMapping("/user")
 public class UserController {
+    @Autowired
+    TokenService tokenService;
+
+    @Autowired
+    UserRepository repository;
 
     @GetMapping
-    public String helloWord() {
-        return "Hello World!";
-    }
+    public UserDTO getUser(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
 
-    @PostMapping
-    public String post() {
-        return "Este foi o post";
+        var sub = tokenService.validateToken(token);
+        User user = (User) repository.findByEmail(sub);
+        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getName());
+
+        return userDTO;
     }
 }
