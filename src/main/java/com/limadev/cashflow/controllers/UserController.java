@@ -1,6 +1,7 @@
 package com.limadev.cashflow.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,13 +25,13 @@ public class UserController {
     UserRepository repository;
 
     @GetMapping
-    public UserDTO getUser(HttpServletRequest request) {
+    public ResponseEntity<UserDTO> getUser(HttpServletRequest request) {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
 
         var sub = tokenService.validateToken(token);
         User user = (User) repository.findByEmail(sub);
         UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getName());
 
-        return userDTO;
+        return ResponseEntity.ok(userDTO);
     }
 }
