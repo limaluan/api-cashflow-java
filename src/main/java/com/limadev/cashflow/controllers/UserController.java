@@ -11,6 +11,7 @@ import com.limadev.cashflow.repositories.UserRepository;
 import com.limadev.cashflow.services.TokenService;
 import com.limadev.cashflow.user.User;
 import com.limadev.cashflow.user.UserDTO;
+import com.limadev.cashflow.user.UserDTOMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -24,13 +25,16 @@ public class UserController {
     @Autowired
     UserRepository repository;
 
+    @Autowired
+    UserDTOMapper userDTOMapper;
+    
     @GetMapping
     public ResponseEntity<UserDTO> getUser(HttpServletRequest request) {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
 
         var sub = tokenService.validateToken(token);
         User user = (User) repository.findByEmail(sub);
-        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getName());
+        UserDTO userDTO = userDTOMapper.apply(user);
 
         return ResponseEntity.ok(userDTO);
     }

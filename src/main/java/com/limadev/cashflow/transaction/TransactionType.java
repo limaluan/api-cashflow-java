@@ -1,6 +1,6 @@
 package com.limadev.cashflow.transaction;
 
-public enum TypeDTO {
+public enum TransactionType {
     credit,
     debit
 }
