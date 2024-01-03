@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.limadev.cashflow.repositories.TransactionRepository;
 import com.limadev.cashflow.repositories.UserRepository;
 import com.limadev.cashflow.services.TokenService;
+import com.limadev.cashflow.services.TransactionService;
 import com.limadev.cashflow.services.UserService;
+import com.limadev.cashflow.transaction.LastTransactionsDTO;
 import com.limadev.cashflow.transaction.Transaction;
 import com.limadev.cashflow.transaction.TransactionDTO;
 import com.limadev.cashflow.transaction.TransactionType;
@@ -41,6 +43,9 @@ public class TransactionController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    TransactionService transactionService;
 
     @GetMapping
     public ResponseEntity<Map<String, List<Transaction>>> getUserTransactions(HttpServletRequest request) {
@@ -72,6 +77,18 @@ public class TransactionController {
         });
 
         return ResponseEntity.ok(new BalanceDTO(credits[0], debits[0], credits[0] - debits[0]));
+    }
+
+    @GetMapping("/lastTransactions")
+    public ResponseEntity<LastTransactionsDTO> getLastTransactions(HttpServletRequest request) {
+        User user = userService.getUser(request);
+
+        Transaction lastCreditTransaction = transactionService
+                .findLastTransactionByType(transactionRepository.findAllByUserId(user.getId()), TransactionType.credit);
+        Transaction lastDebitTransaction = transactionService
+                .findLastTransactionByType(transactionRepository.findAllByUserId(user.getId()), TransactionType.debit);
+
+        return ResponseEntity.ok(new LastTransactionsDTO(lastCreditTransaction, lastDebitTransaction));
     }
 
     @PostMapping
