@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.limadev.cashflow.repositories.TransactionRepository;
 import com.limadev.cashflow.repositories.UserRepository;
 import com.limadev.cashflow.services.TokenService;
+import com.limadev.cashflow.services.UserService;
 import com.limadev.cashflow.transaction.Transaction;
 import com.limadev.cashflow.transaction.TransactionDTO;
+import com.limadev.cashflow.transaction.TransactionType;
+import com.limadev.cashflow.user.BalanceDTO;
 import com.limadev.cashflow.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,12 +39,12 @@ public class TransactionController {
     @Autowired
     TokenService tokenService;
 
+    @Autowired
+    UserService userService;
+
     @GetMapping
     public ResponseEntity<Map<String, List<Transaction>>> getUserTransactions(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-
-        String sub = tokenService.validateToken(token);
-        User user = (User) userRepository.findByEmail(sub);
+        User user = userService.getUser(request);
 
         List<Transaction> transactions = transactionRepository.findAllByUserId(user.getId());
 
@@ -51,13 +54,30 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/balance")
+    public ResponseEntity<BalanceDTO> getUserBalance(HttpServletRequest request) {
+        User user = userService.getUser(request);
+
+        List<Transaction> userTransactions = transactionRepository.findAllByUserId(user.getId());
+
+        final double[] credits = { 0.0 };
+        final double[] debits = { 0.0 };
+
+        userTransactions.forEach(transaction -> {
+            if (transaction.getType() == TransactionType.credit) {
+                credits[0] += transaction.getAmount();
+            } else {
+                debits[0] += transaction.getAmount();
+            }
+        });
+
+        return ResponseEntity.ok(new BalanceDTO(credits[0], debits[0], credits[0] - debits[0]));
+    }
+
     @PostMapping
     public ResponseEntity<Transaction> createTransaction(@RequestBody TransactionDTO data,
             HttpServletRequest request) {
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-
-        String sub = tokenService.validateToken(token);
-        User user = (User) userRepository.findByEmail(sub);
+        User user = userService.getUser(request);
 
         Transaction transaction = new Transaction(data.amount(), data.description(), data.category(), data.type(),
                 LocalDateTime.now(), user);
