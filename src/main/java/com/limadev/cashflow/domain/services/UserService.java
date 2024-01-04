@@ -1,5 +1,7 @@
 package com.limadev.cashflow.domain.services;
 
+import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,6 +39,18 @@ public class UserService {
     public User createUser(RegisterDTO data) throws BusinessException {
         if (this.userRepository.findByEmail(data.email()) != null)
             throw new BusinessException("Este email já está cadastrado.");
+
+        if (data.password().length() < 5) {
+            throw new BusinessException("A senha deve possuir no mínimo 6 caracteres");
+        } else if (!Pattern.compile("\\d").matcher(data.password()).find()) {
+            throw new BusinessException("A senha deve possuir ao menos 1 número");
+        } else if (!Pattern.compile("(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[{}]:;',./?\\\\])").matcher(data.password())
+                .find()) {
+            throw new BusinessException("A senha deve conter ao menos 1 caractere especial");
+        } else if (!Pattern.compile("(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[{}]:;',./?\\\\])(?=.*[A-Z])")
+                .matcher(data.password()).find()) {
+            throw new BusinessException("A senha deve conter ao menos 1 letra maiúscula");
+        }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         User newUser = new User(data.email(), data.name(), encryptedPassword);
