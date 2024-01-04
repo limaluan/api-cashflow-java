@@ -16,6 +16,7 @@ import com.limadev.cashflow.domain.transaction.TransactionDTO;
 import com.limadev.cashflow.domain.transaction.TransactionType;
 import com.limadev.cashflow.domain.user.BalanceDTO;
 import com.limadev.cashflow.domain.user.User;
+import com.limadev.cashflow.exception.BusinessException;
 
 @Service
 public class TransactionService {
@@ -57,7 +58,19 @@ public class TransactionService {
         return new BalanceDTO(credits[0], debits[0], credits[0] - debits[0]);
     }
 
-    public Transaction createTransaction(TransactionDTO data, User user) {
+    public Transaction createTransaction(TransactionDTO data, User user) throws BusinessException {
+        BalanceDTO balance = this.getUserBalance(user.getId());
+
+        if (data.type() == TransactionType.debit && data.amount() > balance.balance())
+            throw new BusinessException("Saldo insuficiente");
+        else if (data.description().length() < 2) {
+            throw new BusinessException("A descrição deve possuir mais de dois caracteres");
+        } else if (data.amount() < 0) {
+            throw new BusinessException("Valor de transação deve ser maior que zero");
+        } else if (data.category().length() < 2) {
+            throw new BusinessException("A categoria deve possuir mais de dois caracteres");
+        }
+
         Transaction transaction = new Transaction(data.amount(), data.description(), data.category(), data.type(),
                 LocalDateTime.now(), user);
 

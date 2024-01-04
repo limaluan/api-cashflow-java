@@ -28,10 +28,11 @@ public class UserService {
     @Autowired
     AuthenticationManager authenticationManager;
 
-    public User getUser(HttpServletRequest request) {
+    public User getUser(HttpServletRequest request) throws BusinessException {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
 
         String sub = tokenService.validateToken(token);
+        if (sub == null) throw new BusinessException("Token inválido");
         User user = (User) userRepository.findByEmail(sub);
         return user;
     }

@@ -19,6 +19,7 @@ import com.limadev.cashflow.domain.transaction.Transaction;
 import com.limadev.cashflow.domain.transaction.TransactionDTO;
 import com.limadev.cashflow.domain.user.BalanceDTO;
 import com.limadev.cashflow.domain.user.User;
+import com.limadev.cashflow.exception.BusinessException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -33,21 +34,21 @@ public class TransactionController {
     TransactionService transactionService;
 
     @GetMapping
-    public ResponseEntity<Map<String, List<Transaction>>> getUserTransactions(HttpServletRequest request) {
+    public ResponseEntity<Map<String, List<Transaction>>> getUserTransactions(HttpServletRequest request) throws BusinessException {
         User user = userService.getUser(request);
 
         return ResponseEntity.ok(transactionService.getUserTransactions(user.getId()));
     }
 
     @GetMapping("/balance")
-    public ResponseEntity<BalanceDTO> getUserBalance(HttpServletRequest request) {
+    public ResponseEntity<BalanceDTO> getUserBalance(HttpServletRequest request) throws BusinessException {
         User user = userService.getUser(request);
 
         return ResponseEntity.ok(transactionService.getUserBalance(user.getId()));
     }
 
     @GetMapping("/lastTransactions")
-    public ResponseEntity<LastTransactionsDTO> getLastTransactions(HttpServletRequest request) {
+    public ResponseEntity<LastTransactionsDTO> getLastTransactions(HttpServletRequest request) throws BusinessException {
         User user = userService.getUser(request);
 
         return ResponseEntity.ok(transactionService.getLastTransactions(user.getId()));
@@ -55,7 +56,7 @@ public class TransactionController {
 
     @PostMapping
     public ResponseEntity<Transaction> createTransaction(@RequestBody TransactionDTO data,
-            HttpServletRequest request) {
+            HttpServletRequest request) throws BusinessException {
         User user = userService.getUser(request);
 
         return ResponseEntity.ok(transactionService.createTransaction(data, user));
