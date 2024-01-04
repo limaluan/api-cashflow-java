@@ -9,8 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.limadev.cashflow.repositories.UserRepository;
-import com.limadev.cashflow.services.TokenService;
+import com.limadev.cashflow.domain.repositories.UserRepository;
+import com.limadev.cashflow.domain.services.TokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

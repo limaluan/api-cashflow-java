@@ -1,4 +1,4 @@
-package com.limadev.cashflow.transaction;
+package com.limadev.cashflow.domain.transaction;
 
 public enum TransactionType {
     credit,

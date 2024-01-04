@@ -1,4 +1,4 @@
-package com.limadev.cashflow.services;
+package com.limadev.cashflow.domain.services;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -11,7 +11,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.limadev.cashflow.user.User;
+import com.limadev.cashflow.domain.user.User;
 
 @Service
 public class TokenService {
@@ -30,7 +30,7 @@ public class TokenService {
 
             return token;
         } catch (JWTCreationException exception) {
-            throw new RuntimeException("Error while generating token", exception);
+            throw new RuntimeException("Erro ao gerar token", exception);
         }
     }
 
@@ -43,7 +43,7 @@ public class TokenService {
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException exception) {
-            return "";
+            throw new RuntimeException("Erro ao validar token", exception);
         }
     }
 

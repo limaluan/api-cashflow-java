@@ -2,55 +2,37 @@ package com.limadev.cashflow.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.limadev.cashflow.repositories.UserRepository;
-import com.limadev.cashflow.services.TokenService;
-import com.limadev.cashflow.user.AuthenticationDTO;
-import com.limadev.cashflow.user.LoginResponseDTO;
-import com.limadev.cashflow.user.RegisterDTO;
-import com.limadev.cashflow.user.User;
+import com.limadev.cashflow.domain.services.UserService;
+import com.limadev.cashflow.domain.user.AuthenticationDTO;
+import com.limadev.cashflow.domain.user.LoginResponseDTO;
+import com.limadev.cashflow.domain.user.RegisterDTO;
+import com.limadev.cashflow.domain.user.User;
+import com.limadev.cashflow.exception.BusinessException;
 
 @RestController
 @RequestMapping("auth")
 @CrossOrigin
 public class AuthenticationController {
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserRepository repository;
-
-    @Autowired
-    private TokenService tokenService;
+    private UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody AuthenticationDTO data) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
-        var auth = authenticationManager.authenticate(usernamePassword);
+        LoginResponseDTO response = userService.login(data);
 
-        var token = tokenService.generateToken((User) auth.getPrincipal());
-
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterDTO data) {
-        if (this.repository.findByEmail(data.email()) != null)
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<User> register(@RequestBody RegisterDTO data) throws BusinessException {
+        User user = userService.createUser(data);
 
-        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        User newUser = new User(data.email(), data.name(), encryptedPassword);
-
-        repository.save(newUser);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(user);
     }
 }

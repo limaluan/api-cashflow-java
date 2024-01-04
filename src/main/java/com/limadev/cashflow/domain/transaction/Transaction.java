@@ -1,8 +1,8 @@
-package com.limadev.cashflow.transaction;
+package com.limadev.cashflow.domain.transaction;
 
 import java.time.LocalDateTime;
 
-import com.limadev.cashflow.user.User;
+import com.limadev.cashflow.domain.user.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

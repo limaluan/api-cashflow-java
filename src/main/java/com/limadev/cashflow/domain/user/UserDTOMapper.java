@@ -1,4 +1,4 @@
-package com.limadev.cashflow.user;
+package com.limadev.cashflow.domain.user;
 
 import java.util.function.Function;
 

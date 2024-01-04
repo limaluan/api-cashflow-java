@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.limadev.cashflow.repositories.UserRepository;
-import com.limadev.cashflow.services.TokenService;
-import com.limadev.cashflow.user.User;
-import com.limadev.cashflow.user.UserDTO;
-import com.limadev.cashflow.user.UserDTOMapper;
+import com.limadev.cashflow.domain.repositories.UserRepository;
+import com.limadev.cashflow.domain.services.TokenService;
+import com.limadev.cashflow.domain.user.User;
+import com.limadev.cashflow.domain.user.UserDTO;
+import com.limadev.cashflow.domain.user.UserDTOMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
