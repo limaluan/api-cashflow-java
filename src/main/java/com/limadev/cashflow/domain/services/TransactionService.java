@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,10 +24,13 @@ public class TransactionService {
     @Autowired
     TransactionRepository transactionRepository;
 
-    public Map<String, List<Transaction>> getUserTransactions(String userId) {
-        List<Transaction> transactions = transactionRepository.findAllByUserId(userId);
+    public Map<String, List<TransactionDTO>> getUserTransactions(String userId) {
+        List<TransactionDTO> transactions = transactionRepository.findAllByUserId(userId).stream().map(transaction -> {
+            return new TransactionDTO(transaction.getAmount(), transaction.getDescription(), transaction.getCategory(),
+                    transaction.getType(), transaction.getCreatedAt());
+        }).collect(Collectors.toList());
 
-        Map<String, List<Transaction>> response = new HashMap<>();
+        Map<String, List<TransactionDTO>> response = new HashMap<>();
         response.put("transactions", transactions);
 
         return response;
@@ -58,20 +62,21 @@ public class TransactionService {
         return new BalanceDTO(credits[0], debits[0], credits[0] - debits[0]);
     }
 
-    public Transaction createTransaction(TransactionDTO data, User user) throws BusinessException {
+    public Transaction createTransaction(Transaction data, User user) throws BusinessException {
         BalanceDTO balance = this.getUserBalance(user.getId());
 
-        if (data.type() == TransactionType.debit && data.amount() > balance.balance())
+        if (data.getType() == TransactionType.debit && data.getAmount() > balance.balance())
             throw new BusinessException("Saldo insuficiente");
-        else if (data.description().length() < 2) {
+        else if (data.getDescription().length() < 2) {
             throw new BusinessException("A descrição deve possuir mais de dois caracteres");
-        } else if (data.amount() < 0) {
+        } else if (data.getAmount() < 0) {
             throw new BusinessException("Valor de transação deve ser maior que zero");
-        } else if (data.category().length() < 2) {
+        } else if (data.getCategory().length() < 2) {
             throw new BusinessException("A categoria deve possuir mais de dois caracteres");
         }
 
-        Transaction transaction = new Transaction(data.amount(), data.description(), data.category(), data.type(),
+        Transaction transaction = new Transaction(data.getAmount(), data.getDescription(), data.getCategory(),
+                data.getType(),
                 LocalDateTime.now(), user);
 
         transactionRepository.save(transaction);
