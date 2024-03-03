@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,11 +47,11 @@ public class TransactionController {
             @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
     })
     @GetMapping
-    public ResponseEntity<Map<String, List<TransactionDTO>>> getUserTransactions(HttpServletRequest request)
+    public ResponseEntity<Page<TransactionDTO>> getUserTransactions(HttpServletRequest request, Pageable pageable)
             throws BusinessException {
         User user = userService.getUser(request);
 
-        return ResponseEntity.ok(transactionService.getUserTransactions(user.getId()));
+        return ResponseEntity.ok(transactionService.getUserTransactions(user.getId(), pageable));
     }
 
     @Operation(summary = "Retorna o saldo do usuário", description = "Retorna o saldo do usuário")

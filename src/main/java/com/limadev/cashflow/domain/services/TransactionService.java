@@ -2,12 +2,11 @@ package com.limadev.cashflow.domain.services;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.limadev.cashflow.domain.repositories.TransactionRepository;
@@ -22,31 +21,25 @@ import com.limadev.cashflow.exception.BusinessException;
 @Service
 public class TransactionService {
     @Autowired
-    TransactionRepository transactionRepository;
+    TransactionRepository repository;
 
-    public Map<String, List<TransactionDTO>> getUserTransactions(String userId) {
-        List<TransactionDTO> transactions = transactionRepository.findAllByUserId(userId).stream().map(transaction -> {
-            return new TransactionDTO(transaction.getAmount(), transaction.getDescription(), transaction.getCategory(),
-                    transaction.getType(), transaction.getCreatedAt());
-        }).collect(Collectors.toList());
-
-        Map<String, List<TransactionDTO>> response = new HashMap<>();
-        response.put("transactions", transactions);
+    public Page<TransactionDTO> getUserTransactions(String userId, Pageable pageable) {
+        var response = repository.findByUserId(userId, pageable);
 
         return response;
     }
 
     public LastTransactionsDTO getLastTransactions(String userId) {
         Transaction lastCreditTransaction = this
-                .findLastTransactionByType(transactionRepository.findAllByUserId(userId), TransactionType.credit);
+                .findLastTransactionByType(repository.findAllByUserId(userId), TransactionType.credit);
         Transaction lastDebitTransaction = this
-                .findLastTransactionByType(transactionRepository.findAllByUserId(userId), TransactionType.debit);
+                .findLastTransactionByType(repository.findAllByUserId(userId), TransactionType.debit);
 
         return new LastTransactionsDTO(lastCreditTransaction, lastDebitTransaction);
     }
 
     public BalanceDTO getUserBalance(String userId) {
-        List<Transaction> userTransactions = transactionRepository.findAllByUserId(userId);
+        List<Transaction> userTransactions = repository.findAllByUserId(userId);
 
         final double[] credits = { 0.0 };
         final double[] debits = { 0.0 };
@@ -79,7 +72,7 @@ public class TransactionService {
                 data.getType(),
                 LocalDateTime.now(), user);
 
-        transactionRepository.save(transaction);
+        repository.save(transaction);
 
         return transaction;
     }
