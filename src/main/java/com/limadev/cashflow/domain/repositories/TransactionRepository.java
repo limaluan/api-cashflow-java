@@ -15,9 +15,9 @@ import com.limadev.cashflow.domain.transaction.TransactionType;
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
     List<Transaction> findAllByUserId(String userId);
 
-    Page<TransactionDTO> findByUserId(String userId, Pageable pageable);
+    Page<TransactionDTO> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
 
-    Page<TransactionDTO> findByUserIdAndDescriptionContaining(
+    Page<TransactionDTO> findByUserIdAndDescriptionContainingOrderByCreatedAtDesc(
             String userId,
             String transactionDescription,
             Pageable pageable);
