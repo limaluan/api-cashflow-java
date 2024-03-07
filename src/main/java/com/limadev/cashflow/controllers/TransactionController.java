@@ -1,8 +1,5 @@
 package com.limadev.cashflow.controllers;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.limadev.cashflow.domain.services.TransactionService;
@@ -34,89 +32,97 @@ import jakarta.servlet.http.HttpServletRequest;
 @CrossOrigin
 @SecurityRequirement(name = "bearer-key")
 public class TransactionController {
-    @Autowired
-    UserService userService;
+        @Autowired
+        UserService userService;
 
-    @Autowired
-    TransactionService transactionService;
+        @Autowired
+        TransactionService transactionService;
 
-    @Operation(summary = "Retorna transações do usuário", description = "Retorna todas transações do usuário")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retorna todas transações do usuário"),
-            @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
-            @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
-    })
-    @GetMapping
-    public ResponseEntity<Page<TransactionDTO>> getUserTransactions(HttpServletRequest request, Pageable pageable)
-            throws BusinessException {
-        User user = userService.getUser(request);
+        @Operation(summary = "Retorna transações do usuário", description = "Retorna todas transações do usuário")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Retorna todas transações do usuário"),
+                        @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                        @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+        })
+        @GetMapping
+        public ResponseEntity<Page<TransactionDTO>> getUserTransactions(
+                        HttpServletRequest request,
+                        @RequestParam(required = false) String transactionDescription,
+                        Pageable pageable)
+                        throws BusinessException {
+                User user = userService.getUser(request);
 
-        return ResponseEntity.ok(transactionService.getUserTransactions(user.getId(), pageable));
-    }
+                if (transactionDescription != null && !transactionDescription.isEmpty()) {
+                        return ResponseEntity.ok(transactionService.getUserTransactions(user.getId(),
+                                        transactionDescription, pageable));
+                } else {
+                        return ResponseEntity.ok(transactionService.getUserTransactions(user.getId(), pageable));
+                }
+        }
 
-    @Operation(summary = "Retorna o saldo do usuário", description = "Retorna o saldo do usuário")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retorna o saldo do usuário"),
-            @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
-            @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
-    })
-    @GetMapping("/balance")
-    public ResponseEntity<BalanceDTO> getUserBalance(HttpServletRequest request) throws BusinessException {
-        User user = userService.getUser(request);
+        @Operation(summary = "Retorna o saldo do usuário", description = "Retorna o saldo do usuário")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Retorna o saldo do usuário"),
+                        @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                        @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+        })
+        @GetMapping("/balance")
+        public ResponseEntity<BalanceDTO> getUserBalance(HttpServletRequest request) throws BusinessException {
+                User user = userService.getUser(request);
 
-        return ResponseEntity.ok(transactionService.getUserBalance(user.getId()));
-    }
+                return ResponseEntity.ok(transactionService.getUserBalance(user.getId()));
+        }
 
-    @Operation(summary = "Retorna as últimas transações do usuário", description = "Retorna as últimas transações feitas pelo usuário")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retorna as últimas transações feitas pelo usuário"),
-            @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
-            @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
-    })
-    @GetMapping("/lastTransactions")
-    public ResponseEntity<LastTransactionsDTO> getLastTransactions(HttpServletRequest request)
-            throws BusinessException {
-        User user = userService.getUser(request);
+        @Operation(summary = "Retorna as últimas transações do usuário", description = "Retorna as últimas transações feitas pelo usuário")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Retorna as últimas transações feitas pelo usuário"),
+                        @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                        @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+        })
+        @GetMapping("/lastTransactions")
+        public ResponseEntity<LastTransactionsDTO> getLastTransactions(HttpServletRequest request)
+                        throws BusinessException {
+                User user = userService.getUser(request);
 
-        return ResponseEntity.ok(transactionService.getLastTransactions(user.getId()));
-    }
+                return ResponseEntity.ok(transactionService.getLastTransactions(user.getId()));
+        }
 
-    @Operation(summary = "Cria uma transação", description = "Cria uma transação")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Cria um produto no banco de dados"),
-            @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
-            @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
-    })
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Campos de entrada: <br>" +
-            "<ul>" +
-            "<li>**__amount__**: Valor da Transação.</li>" +
-            "<ul>" +
-            "<li>**O valor deve ser maior que 0.**</li>" +
-            "<li>**O campo não pode ser vazio**</li>" +
-            "</ul>" +
-            "</li>" +
-            "<li>**__description__**: Descrição da Transação.</li>" +
-            "<ul>" +
-            "<li>**Deve possuir mais de 2 caracteres.**</li>" +
-            "<li>**O campo não pode ser vazio**</li>" +
-            "</ul>" +
-            "</li>" +
-            "<li>**__type__**: Tipo da Transação.</li>" +
-            "<ul>" +
-            "<li>**O tipo só pode ser credit ou debit.**</li>" +
-            "</ul>" +
-            "<li>**__category__**: Categoria da Transação.</li>" +
-            "<ul>" +
-            "<li>**Deve possuir mais de 2 caracteres.**</li>" +
-            "<li>**O campo não pode ser vazio**</li>" +
-            "</li>" +
-            "</ul>" +
-            "</ul>")
-    @PostMapping
-    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction data,
-            HttpServletRequest request) throws BusinessException {
-        User user = userService.getUser(request);
+        @Operation(summary = "Cria uma transação", description = "Cria uma transação")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "201", description = "Cria um produto no banco de dados"),
+                        @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                        @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+        })
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Campos de entrada: <br>" +
+                        "<ul>" +
+                        "<li>**__amount__**: Valor da Transação.</li>" +
+                        "<ul>" +
+                        "<li>**O valor deve ser maior que 0.**</li>" +
+                        "<li>**O campo não pode ser vazio**</li>" +
+                        "</ul>" +
+                        "</li>" +
+                        "<li>**__description__**: Descrição da Transação.</li>" +
+                        "<ul>" +
+                        "<li>**Deve possuir mais de 2 caracteres.**</li>" +
+                        "<li>**O campo não pode ser vazio**</li>" +
+                        "</ul>" +
+                        "</li>" +
+                        "<li>**__type__**: Tipo da Transação.</li>" +
+                        "<ul>" +
+                        "<li>**O tipo só pode ser credit ou debit.**</li>" +
+                        "</ul>" +
+                        "<li>**__category__**: Categoria da Transação.</li>" +
+                        "<ul>" +
+                        "<li>**Deve possuir mais de 2 caracteres.**</li>" +
+                        "<li>**O campo não pode ser vazio**</li>" +
+                        "</li>" +
+                        "</ul>" +
+                        "</ul>")
+        @PostMapping
+        public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction data,
+                        HttpServletRequest request) throws BusinessException {
+                User user = userService.getUser(request);
 
-        return ResponseEntity.status(201).body(transactionService.createTransaction(data, user));
-    }
+                return ResponseEntity.status(201).body(transactionService.createTransaction(data, user));
+        }
 }

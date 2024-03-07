@@ -23,6 +23,12 @@ public class TransactionService {
     @Autowired
     TransactionRepository repository;
 
+    public Page<TransactionDTO> getUserTransactions(String userId, String transactionDescription, Pageable pageable) {
+        var response = repository.findByUserIdAndDescriptionContaining(userId, transactionDescription, pageable);
+
+        return response;
+    }
+
     public Page<TransactionDTO> getUserTransactions(String userId, Pageable pageable) {
         var response = repository.findByUserId(userId, pageable);
 
