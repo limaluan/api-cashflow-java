@@ -24,7 +24,7 @@ public class TransactionService {
     TransactionRepository repository;
 
     public Page<TransactionDTO> getUserTransactions(String userId, String transactionDescription, Pageable pageable) {
-        var response = repository.findByUserIdAndDescriptionContainingOrderByCreatedAtDesc(userId, transactionDescription, pageable);
+        var response = repository.findByUserIdAndDescriptionContainingIgnoreCaseOrderByCreatedAtDesc(userId, transactionDescription, pageable);
 
         return response;
     }

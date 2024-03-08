@@ -17,7 +17,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
 
     Page<TransactionDTO> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
 
-    Page<TransactionDTO> findByUserIdAndDescriptionContainingOrderByCreatedAtDesc(
+    Page<TransactionDTO> findByUserIdAndDescriptionContainingIgnoreCaseOrderByCreatedAtDesc(
             String userId,
             String transactionDescription,
             Pageable pageable);

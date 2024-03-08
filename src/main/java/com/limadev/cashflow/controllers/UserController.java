@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,12 +29,12 @@ public class UserController {
 
     @Operation(summary = "Retorna dados do usuário", description = "Retorna os dados do usuário a partir do token")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retorna os dados do usuário"),
-            @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
-            @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+            @ApiResponse(responseCode = "200", description = "Retorna os dados do usuário")
     })
     @GetMapping
-    public ResponseEntity<UserDTO> getUser(HttpServletRequest request) throws BusinessException {
+    public ResponseEntity<UserDTO> getUser(
+            HttpServletRequest request,
+            @RequestHeader("Authorization") String authorizationHeader) throws BusinessException {
         User user = userService.getUser(request);
         UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail());
 
